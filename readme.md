@@ -1,4 +1,4 @@
-# Remote Range of Motion Assessment
+# Remote ROM Assessment
 #### Device-Agnostic Remote Range-of-motion Assessment using Data Abstraction
 
 ![RemoteROMAssessment_Diagram](https://github.com/user-attachments/assets/4a74231e-ee0f-420b-9748-cffc07a557da)
