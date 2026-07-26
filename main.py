@@ -63,7 +63,13 @@ class Main:
 
         cls._load_view(cls.ok_text, cls.exit_text, homeView.HomeView.show, operation_option)
 
-        ui.mainloop()
+        try:
+            ui.mainloop()
+        finally:
+            if hasattr(poseCapturerView.PoseCapturerView, 'camera') and poseCapturerView.PoseCapturerView.camera.isOpened():
+                poseCapturerView.PoseCapturerView.camera.release()
+            if hasattr(poseCapturerViewPatient.PoseCapturerViewPatient, 'camera') and poseCapturerViewPatient.PoseCapturerViewPatient.camera.isOpened():
+                poseCapturerViewPatient.PoseCapturerViewPatient.camera.release()
         return
 
     @classmethod

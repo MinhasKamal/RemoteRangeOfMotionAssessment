@@ -4,6 +4,8 @@
 import movement
 import cv2
 import json
+import os
+import re
 from datetime import datetime
 import utils
 
@@ -23,18 +25,20 @@ class PatientRecord:
         return
 
     def __str__(self) -> str:
-        string: str = "{\n"
-        string += f"\"name\" : \"{self.name}\",\n"
-        string += f"\"repeat\" : {self.repeat},\n"
-        string += f"\"dates\" : {json.dumps(self.dates)},\n"
-        string += f"\"scores\" : {json.dumps(self.scores)},\n"
-        string += f"\"movement_file_path\" : \"{self.movement_file_path}\"\n"
-        string += "}\n"
-        return string
+        data = {
+            "name": self.name,
+            "repeat": self.repeat,
+            "dates": self.dates,
+            "scores": self.scores,
+            "movement_file_path": self.movement_file_path
+        }
+        return json.dumps(data, indent=4) + "\n"
 
     def save(self) -> None:
+        os.makedirs("res", exist_ok=True)
         if not self.file_path:
-            self.file_path = "res/" + self.name
+            safe_name = re.sub(r'[^\w\s-]', '', self.name).strip()
+            self.file_path = "res/" + safe_name
         with open(self.file_path + utils.patient_file_extension, "w") as file:
             file.write(str(self))
         return

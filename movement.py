@@ -5,6 +5,8 @@ from datetime import datetime
 import cv2
 import json
 import types
+import os
+import re
 import utils
 
 class Movement:
@@ -21,33 +23,24 @@ class Movement:
         return
 
     def __str__(self) -> str:
-        string: str = "{\n"
-        string += f"\"name\" : \"{self.name}\",\n"
-        string += f"\"tracking_joint_list\" : {json.dumps(self.tracking_joint_list)},\n"
-        string += f"\"observing_joint_list\" : {json.dumps(self.observing_joint_list)},\n"
-        string += f"\"resting_pose_joint_coordinates\" : \
-            [{self._joint_coordinates_to_str(self.resting_pose_joint_coordinates)}],\n"
-        string += f"\"flexing_pose_joint_coordinates\" : \
-            [{self._joint_coordinates_to_str(self.flexing_pose_joint_coordinates)}]\n"
-        string += "}\n"
-        return string
-    
-    def _joint_coordinates_to_str(self, joint_coordinates: list) -> str:
-        joint_str: str = ""
-        if joint_coordinates:
-            for joint_coordinate in joint_coordinates:
-                joint_str += "\n{" 
-                joint_str += f"\"x\":{joint_coordinate.x},"
-                joint_str += f"\"y\":{joint_coordinate.y},"
-                joint_str += f"\"z\":{joint_coordinate.z},"
-                joint_str += f"\"visibility\":{joint_coordinate.visibility}"
-                joint_str += "},"
-            joint_str = joint_str[:-1]
-        return joint_str
+        data = {
+            "name": self.name,
+            "tracking_joint_list": self.tracking_joint_list,
+            "observing_joint_list": self.observing_joint_list,
+            "resting_pose_joint_coordinates": [
+                {"x": j.x, "y": j.y, "z": j.z, "visibility": j.visibility} for j in self.resting_pose_joint_coordinates
+            ] if self.resting_pose_joint_coordinates else [],
+            "flexing_pose_joint_coordinates": [
+                {"x": j.x, "y": j.y, "z": j.z, "visibility": j.visibility} for j in self.flexing_pose_joint_coordinates
+            ] if self.flexing_pose_joint_coordinates else []
+        }
+        return json.dumps(data, indent=4) + "\n"
     
     def save(self) -> None:
+        os.makedirs("res", exist_ok=True)
         if not self.file_path:
-            self.file_path = "res/" + self.name + "_" + datetime.today().strftime("%Y%m%d%H%M%S")
+            safe_name = re.sub(r'[^\w\s-]', '', self.name).strip()
+            self.file_path = "res/" + safe_name + "_" + datetime.today().strftime("%Y%m%d%H%M%S")
             
         with open(self.file_path + utils.movement_file_extension, "w") as file:
             file.write(str(self))
